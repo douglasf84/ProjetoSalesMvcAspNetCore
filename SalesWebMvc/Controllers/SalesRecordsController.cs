@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SalesWebMvc.Services;
+using SalesWebMvc.Models.ViewModels;
+using SalesWebMvc.Models;
+using SalesWebMvc.Models.Enums;
 
 namespace SalesWebMvc.Controllers
 {
@@ -11,10 +14,12 @@ namespace SalesWebMvc.Controllers
     {
 
         private readonly SalesRecordService _salesRecordeServices;
+        private readonly SellerService _sellerService;
 
-        public SalesRecordsController(SalesRecordService salesRecordeServices)
+        public SalesRecordsController(SalesRecordService salesRecordeServices, SellerService sellerService)
         {
             _salesRecordeServices = salesRecordeServices;
+            _sellerService = sellerService;
         }
 
         public IActionResult Index()
@@ -41,7 +46,6 @@ namespace SalesWebMvc.Controllers
             return View(result);
         }
 
-
         public async Task<IActionResult> GroupingSearch(DateTime? minDate, DateTime? maxDate)
         {
             if (!minDate.HasValue)
@@ -54,6 +58,7 @@ namespace SalesWebMvc.Controllers
                 maxDate = DateTime.Now;
             }
 
+
             ViewData["minDate"] = minDate.Value.ToString("yyyy-MM-dd");
             ViewData["maxDate"] = maxDate.Value.ToString("yyyy-MM-dd");
 
@@ -61,5 +66,32 @@ namespace SalesWebMvc.Controllers
             return View(result);
         }
 
+        public async Task<IActionResult> Create()
+        {
+            var sellers = await _salesRecordeServices.FindAllAsync();
+            var viewModel = new SalesRecordFormViewModel { Sellers = sellers };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(SalesRecord salesRecord)
+        {
+            if (!ModelState.IsValid)
+            {
+                var sellers = await _salesRecordeServices.FindAllAsync();
+                var viewModel = new SalesRecordFormViewModel { Sellers = sellers };
+                return View(viewModel);
+            }
+
+            //salesRecord.Status = Enum.Parse<SaleStatus>(ViewData["StatusId"].ToString());
+            salesRecord.Status = Enum.Parse<SaleStatus>(ViewData["SaleStatusId"].ToString());
+            salesRecord.Date = DateTime.Now.Date;
+            await _salesRecordeServices.InsertAsync(salesRecord);
+            return RedirectToAction(nameof(Index));
+
+        }
+
     }
 }
+

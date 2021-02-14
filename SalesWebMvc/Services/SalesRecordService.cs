@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using SalesWebMvc.Models.Enums;
 
 namespace SalesWebMvc.Services
 {
@@ -15,6 +16,12 @@ namespace SalesWebMvc.Services
         public SalesRecordService(SalesWebMvcContext context)
         {
             _context = context;
+        }
+
+        public async Task InsertAsync(SalesRecord obj)
+        {
+            _context.Add(obj);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<SalesRecord>> FindByDateAsync(DateTime? minDate, DateTime? maxDate)
@@ -55,5 +62,11 @@ namespace SalesWebMvc.Services
                 .GroupBy(x => x.Seller.Department)
                 .ToListAsync();
         }
+
+        public async Task<List<Seller>> FindAllAsync()
+        {            
+            return await _context.Seller.ToListAsync();
+        }
+
     }
 }

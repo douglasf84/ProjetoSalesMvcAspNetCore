@@ -14,6 +14,7 @@ namespace SalesWebMvc.Data
             _context = context;
         }
 
+        /*
         public void Seed()
         {
 
@@ -81,5 +82,6 @@ namespace SalesWebMvc.Data
 
             _context.SaveChanges();
         }
+        */
     }
 }
